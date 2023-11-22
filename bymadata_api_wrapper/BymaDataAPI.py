@@ -65,11 +65,7 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
+        ops = res["result"]
 
         if ticker:
             ops = [op for op in ops if op.get("security_id").startswith(ticker)]
@@ -92,11 +88,7 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
+        ops = res.get("result")
 
         if ticker:
             ops = [op for op in ops if op.get("security_id").startswith(ticker)]
@@ -115,13 +107,7 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
-
-        return ops
+        return res["result"]
 
 
     @validate_params(service="options", ignore=["ticker"])
@@ -136,11 +122,7 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
+        ops = res["result"]
 
         if ticker:
             ops = [op for op in ops if op.get("security_id").startswith(ticker)]
@@ -159,13 +141,7 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
-
-        return ops
+        return res["result"]
 
 
     @validate_params(service="trading_lots")
@@ -180,13 +156,7 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
-
-        return ops
+        return res["result"]
 
 
     @validate_params(service="loans")
@@ -201,27 +171,14 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
-
-        return ops
-
+        return res["result"]
 
 
     def indices(self):
 
         res = self._data_request(path="indices")
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
-
-        return ops
+        return res["result"]
 
 
 
@@ -229,17 +186,11 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path="turnover")
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            return res
-            raise ValueError("Error processing request.")
-
-        return ops
+        return res["result"]
 
 
 
-    def intraday_ops(self, ticker=None, settle_period="0003", currency="ARS", market="CT", operative_form="C", as_df=False, security_id=None):
+    def intraday_ops(self, ticker=None, settle_period="0003", currency="ARS", market="CT", operative_form="C", security_id=None):
 
         path="intraday"
 
@@ -250,24 +201,7 @@ class BymaDataAPI(BymaDataClient):
 
         res = self._data_request(path=path, params=params)
 
-        try:
-            ops = res.get("result")
-        except KeyError:
-            raise BymaDataAPIError("Error processing request.")
-
-        if as_df:
-            ops = pd.DataFrame(ops)
-            if not ops.empty:
-                ops["Datetime"] = ops.apply(lambda row: datetime(int(row["Date"].split("-")[0]),
-                                                                 int(row["Date"].split("-")[1]),
-                                                                 int(row["Date"].split("-")[2]),
-                                                                 int(str(row["Transact_Time"])[0:2]),
-                                                                 int(str(row["Transact_Time"])[2:4]),
-                                                                 int(str(row["Transact_Time"])[4:6])), axis = 1)
-                ops.drop(["Date", "Transact_Time"], axis = 1, inplace = True)
-                ops.set_index("Datetime", inplace = True)
-
-        return ops
+        return res["result"]
 
 
 ######################################################

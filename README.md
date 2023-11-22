@@ -106,7 +106,7 @@ Returns intraday operations for a security. A security can be determined by it´
 
 ```python
 # Intraday Operations Data
-sn.intraday_ops(ticker = None, settle_period="0003", currency="ARS", market="CT", operative_form="C", as_df=False, security_id=None)
+sn.intraday_ops(ticker = None, settle_period="0003", currency="ARS", market="CT", operative_form="C", security_id=None)
 ```
 
 ## Wrapper Functions and Corresponding API Endpoints
