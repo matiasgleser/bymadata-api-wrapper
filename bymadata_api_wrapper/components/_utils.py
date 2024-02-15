@@ -57,8 +57,7 @@ def process_response(response: requests.Response) -> Dict[str, Any]:
         raise BymaDataAPIError("An error ocurred when processing the request.") from e
 
     except:
-        raise BymaDataAPIError("An unexpected error ocurred") from e
-
+        raise BymaDataAPIError("An unexpected error ocurred")
 
 
 def _validate_params(service, **kwargs):
