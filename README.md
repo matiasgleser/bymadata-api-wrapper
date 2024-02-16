@@ -12,7 +12,7 @@ Unofficial wrapper for the recently released [BymaData API service](https://www.
 Installation of this package is not yet available from [pip](https://pip.pypa.io/en/stable/getting-started/), to download clone the repo with:
 
 ```console
-git clone git+https://github.com/matiasgleser/bymadata-api-wrapper.git
+git clone https://github.com/matiasgleser/bymadata-api-wrapper.git
 ```
 
 # Usage
