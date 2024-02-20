@@ -58,7 +58,7 @@ class BymaDataClient(object):
 
         self._session.mount("https://", adapter=HTTPAdapter())
 
-        self._enpoint = None
+        self._endpoint = None
 
         # Associate the finalize callbacks with the instance.
         # When the instance is garbage collected, the sessions will be closed.
