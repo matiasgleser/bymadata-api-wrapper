@@ -72,10 +72,10 @@ class BymaDataClient(object):
 
         if token_response:
             r = token_response.json()
-            self._scopes = r.get("scope")
-            self._token = r.get("access_token")
-            self._token_type = r.get("token_type")
-            self._token_expiration = current_time + r.get("expires_in")
+            self._scopes = r.get("scope", [])
+            self._token = r.get("access_token", "")
+            self._token_type = r.get("token_type", "")
+            self._token_expiration = current_time + r.get("expires_in", 0)
             self._session.headers.update(
                 {
                     "Authorization": f"{self._token_type} {self._token}"
