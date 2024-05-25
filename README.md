@@ -12,7 +12,7 @@ Unofficial wrapper for the recently released [BymaData API service](https://www.
 To install this module run:
 
 ```console
-pip install git+clone https://github.com/matiasgleser/bymadata-api-wrapper.git
+pip install git+https://github.com/matiasgleser/bymadata-api-wrapper.git
 ```
 
 # Usage
