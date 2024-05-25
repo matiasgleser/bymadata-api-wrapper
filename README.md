@@ -9,10 +9,10 @@ Unofficial wrapper for the recently released [BymaData API service](https://www.
 
 ## Installation
 
-Installation of this package is not yet available from [pip](https://pip.pypa.io/en/stable/getting-started/), to download clone the repo with:
+To install this module run:
 
 ```console
-git clone https://github.com/matiasgleser/bymadata-api-wrapper.git
+pip install git+clone https://github.com/matiasgleser/bymadata-api-wrapper.git
 ```
 
 # Usage
