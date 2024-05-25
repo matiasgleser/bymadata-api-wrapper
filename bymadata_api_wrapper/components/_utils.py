@@ -2,8 +2,7 @@ import time
 import json
 import requests
 
-from typing import Any, Dict
-
+from typing import Any, Dict, Callable, Optional, List
 from functools import wraps
 from inspect import signature
 
@@ -22,11 +21,19 @@ from ._enums import (
     LoansParameters,
 )
 
-
 listring = lambda x: ", ".join(x)
 
+def ensure_token(func: Callable) -> Callable:
+    """
+    Decorator to ensure that the API token is valid and refreshed if necessary.
 
-def ensure_token(func):
+    Args:
+        func (Callable): The function to be decorated.
+
+    Returns:
+        Callable: The decorated function.
+    """
+    @wraps(func)
     def wrapper(self, *args, **kwargs):
         current_time = time.time()
         if self._token is None or self._token_expiration - current_time <= 60:
@@ -34,13 +41,23 @@ def ensure_token(func):
         return func(self, *args, **kwargs)
     return wrapper
 
-
-
 def process_response(response: requests.Response) -> Dict[str, Any]:
+    """
+    Process the response from the API.
+
+    Args:
+        response (requests.Response): The response object from the API request.
+
+    Returns:
+        Dict[str, Any]: The processed response data.
+
+    Raises:
+        BymaDataAPIError: If the response contains an error or unexpected status code.
+        UnexpectedResponseError: If the response contains an unexpected status code.
+    """
     try:
         if response.status_code == 200:
             return response.json()
-
         elif response.status_code == 400:
             try:
                 data = response.json()
@@ -52,25 +69,31 @@ def process_response(response: requests.Response) -> Dict[str, Any]:
         else:
             error_msg = f"Received unexpected status code: {response.status_code}"
             raise UnexpectedResponseError(error_msg)
-
     except requests.RequestException as e:
-        raise BymaDataAPIError("An error ocurred when processing the request.") from e
+        raise BymaDataAPIError("An error occurred when processing the request.") from e
+    except Exception:
+        raise BymaDataAPIError("An unexpected error occurred")
 
-    except:
-        raise BymaDataAPIError("An unexpected error ocurred")
+def _validate_params(service: str, **kwargs: Any) -> None:
+    """
+    Validates parameters for the specified service.
 
+    Args:
+        service (str): The service name.
+        **kwargs (Any): The parameters to validate.
 
-def _validate_params(service, **kwargs):
-
+    Raises:
+        ValueError: If required parameters are missing or have invalid values.
+    """
     PARAMETERS = {
-    "equity" : EquityParameters,
-    "fixed_income" : FixedIncomeParameters,
-    "futures" : FuturesParameters,
-    "options" : OptionsParameters,
-    "collateralized_repos" : ReposParameters,
-    "trading_lots" : TradingLotsParameters,
-    "loans" : LoansParameters,
-    # "intraday" : IntradayOpsParameters
+        "equity": EquityParameters,
+        "fixed_income": FixedIncomeParameters,
+        "futures": FuturesParameters,
+        "options": OptionsParameters,
+        "collateralized_repos": ReposParameters,
+        "trading_lots": TradingLotsParameters,
+        "loans": LoansParameters,
+        # "intraday": IntradayOpsParameters
     }
 
     validator = PARAMETERS.get(service)
@@ -80,7 +103,7 @@ def _validate_params(service, **kwargs):
     try:
         unrequired_params = list(validator.NotRequired.keys())
     except AttributeError:
-        pass
+        unrequired_params = []
 
     # Check if all required parameters are present
     missing_params = [param for param in required_params if param not in kwargs]
@@ -88,37 +111,33 @@ def _validate_params(service, **kwargs):
         raise ValueError(f"Missing required parameters: {listring(missing_params)}")
 
     for key, value in kwargs.items():
-        
         if key in required_params:
             _valids = [val.value for val in validator.Required.get(key).__members__.values()]
-        elif unrequired_params and key in unrequired_params:
+        elif key in unrequired_params:
             _valids = [val.value for val in validator.NotRequired.get(key).__members__.values()]
         else:
             raise ValueError(f"Unknown parameter: {key}")
-        
-        if key in required_params:
-            if not value in _valids:
-                raise ValueError("Invalid value for {_key} parameter: {_value}. Must be one of {_vals}".format(
-                        _key=key, _value=value, _vals=listring(_valids)
-                    )    
-                )
-            
-        elif key in unrequired_params:
-            if not value in _valids:
-                raise ValueError("Invalid value for {_key} parameter: {_value}. Must be one of {_vals}".format(
-                        _key=key, _value=value, _vals=listring(_valids)
-                    )    
-                )
 
+        if key in required_params or key in unrequired_params:
+            if value not in _valids:
+                raise ValueError(f"Invalid value for {key} parameter: {value}. Must be one of {listring(_valids)}")
 
-def validate_params(service, validator=_validate_params, ignore=None):
+def validate_params(service: str, validator: Callable = _validate_params, ignore: Optional[List[str]] = None) -> Callable:
     """
-    Parameter validation decorator
+    Parameter validation decorator.
+
+    Args:
+        service (str): The service name.
+        validator (Callable): The validation function.
+        ignore (Optional[List[str]]): List of parameters to ignore during validation.
+
+    Returns:
+        Callable: The decorator function.
     """
     if ignore is None:
         ignore = []
 
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Prepare arguments for validation
@@ -137,4 +156,3 @@ def validate_params(service, validator=_validate_params, ignore=None):
         return wrapper
 
     return decorator
-
